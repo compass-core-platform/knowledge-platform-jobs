@@ -44,8 +44,8 @@ trait BatchCreation {
 
   def batchRequired(metadata: java.util.Map[String, AnyRef], identifier: String)(implicit config: PostPublishProcessorConfig, cassandraUtil: CassandraUtil): Boolean = {
     val trackable = isTrackable(metadata, identifier)
+    logger.info("trackable",trackable)
     if (trackable) {
-      logger.info("trackable",trackable)
       !isBatchExists(identifier)
     } else false
   }
@@ -66,7 +66,6 @@ trait BatchCreation {
 
   def isBatchExists(identifier: String)(implicit config: PostPublishProcessorConfig, cassandraUtil: CassandraUtil): Boolean = {
     val selectQuery = QueryBuilder.select().all().from(config.lmsKeyspaceName, config.batchTableName)
-    logger.info("keyspace and table name",config.lmsKeyspaceName, config.batchTableName)
     selectQuery.where.and(QueryBuilder.eq("courseid", identifier))
     val rows = cassandraUtil.find(selectQuery.toString)
     if (CollectionUtils.isNotEmpty(rows)) {
