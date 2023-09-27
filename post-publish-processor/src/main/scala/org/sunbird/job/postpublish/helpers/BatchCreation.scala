@@ -44,10 +44,12 @@ trait BatchCreation {
 
   def batchRequired(metadata: java.util.Map[String, AnyRef], identifier: String)(implicit config: PostPublishProcessorConfig, cassandraUtil: CassandraUtil): Boolean = {
     val trackable = isTrackable(metadata, identifier)
-    logger.info("trackable",trackable)
     if (trackable) {
+      logger.info("trackable true",trackable)
       !isBatchExists(identifier)
-    } else false
+    } else {
+      false
+    }
   }
 
   def isTrackable(metadata: java.util.Map[String, AnyRef], identifier: String): Boolean = {
@@ -83,7 +85,7 @@ trait BatchCreation {
   def getBatchDetails(identifier: String)(implicit neo4JUtil: Neo4JUtil, cassandraUtil: CassandraUtil, config: PostPublishProcessorConfig): util.Map[String, AnyRef] = {
     logger.info("Process Batch Creation for content: " + identifier)
     val metadata = neo4JUtil.getNodeProperties(identifier)
-    logger.info("printing metadata",metadata)
+    logger.info("printing metadata ${metadata.toString()}")
     // Validate and trigger batch creation.
     if (batchRequired(metadata, identifier)(config, cassandraUtil)) {
       logger.info("batchRequired")
