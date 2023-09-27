@@ -42,17 +42,17 @@ class PostPublishProcessorStreamTask(config: PostPublishProcessorConfig, kafkaCo
     shallowCopyPublishStream.getSideOutput(config.publishEventOutTag).addSink(kafkaConnector.kafkaStringSink(config.contentPublishTopic))
       .name("shallow-content-publish-producer").uid("shallow-content-publish-producer")
 
-    val linkDialCodeStream = processStreamTask.getSideOutput(config.linkDIALCodeOutTag)
-      .process(new DIALCodeLinkFunction(config, httpUtil))
-      .name("dialcode-link-process").uid("dialcode-link-process").setParallelism(config.linkDialCodeParallelism)
-
-    linkDialCodeStream.getSideOutput(config.generateQRImageOutTag).addSink(kafkaConnector.kafkaStringSink(config.QRImageGeneratorTopic))
-
-    val dialcodeContextUpdaterStream = processStreamTask.getSideOutput(config.dialcodeContextOutTag)
-      .process(new DialCodeContextUpdaterFunction(config))
-      .name("dialcode-context-updater-process").uid("dialcode-context-updater-process").setParallelism(config.dialcodeContextUpdaterParallelism)
-
-    dialcodeContextUpdaterStream.getSideOutput(config.dialcodeContextUpdaterOutTag).addSink(kafkaConnector.kafkaStringSink(config.dialcodeContextUpdaterTopic))
+//    val linkDialCodeStream = processStreamTask.getSideOutput(config.linkDIALCodeOutTag)
+//      .process(new DIALCodeLinkFunction(config, httpUtil))
+//      .name("dialcode-link-process").uid("dialcode-link-process").setParallelism(config.linkDialCodeParallelism)
+//
+//    linkDialCodeStream.getSideOutput(config.generateQRImageOutTag).addSink(kafkaConnector.kafkaStringSink(config.QRImageGeneratorTopic))
+//
+//    val dialcodeContextUpdaterStream = processStreamTask.getSideOutput(config.dialcodeContextOutTag)
+//      .process(new DialCodeContextUpdaterFunction(config))
+//      .name("dialcode-context-updater-process").uid("dialcode-context-updater-process").setParallelism(config.dialcodeContextUpdaterParallelism)
+//
+//    dialcodeContextUpdaterStream.getSideOutput(config.dialcodeContextUpdaterOutTag).addSink(kafkaConnector.kafkaStringSink(config.dialcodeContextUpdaterTopic))
 
     env.execute(config.jobName)
   }
