@@ -49,13 +49,13 @@ class PostPublishEventRouter(config: PostPublishProcessorConfig, httpUtil: HttpU
         context.output(config.batchCreateOutTag, batchDetails)
 
       // Process Dialcode link
-      val dialCodeDetails = getDialCodeDetails(identifier, event)(neo4JUtil, config)
-      if (!dialCodeDetails.isEmpty)
-        context.output(config.linkDIALCodeOutTag, dialCodeDetails)
-
-      val dialcodeContextMap = getDialCodeContextMap(event)
-      if(!dialcodeContextMap.isEmpty)
-        context.output(config.dialcodeContextOutTag, dialcodeContextMap)
+//      val dialCodeDetails = getDialCodeDetails(identifier, event)(neo4JUtil, config)
+//      if (!dialCodeDetails.isEmpty)
+//        context.output(config.linkDIALCodeOutTag, dialCodeDetails)
+//
+//      val dialcodeContextMap = getDialCodeContextMap(event)
+//      if(!dialcodeContextMap.isEmpty)
+//        context.output(config.dialcodeContextOutTag, dialcodeContextMap)
     }
     else if (event.action.equals("post-publish-process") && event.eData.contains("addContextDialCodes") && event.eData.contains("removeContextDialCodes")) {
       val dialcodeContextMap = getDialCodeContextMap(event)
