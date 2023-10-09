@@ -84,4 +84,9 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
   val primaryCategories: util.List[String] = if (config.hasPath("dialcode.linkable.primaryCategory")) config.getStringList("dialcode.linkable.primaryCategory") else util.Arrays.asList("Course") //List[String]("Course")
   val dialcodeContextUpdaterTopic: String = config.getString("kafka.dialcode.context.topic")
 
+  val sunbirdKeyspaceName = config.getString("lms-cassandra.sbKeyspace")
+  val defaultCertTemplateId = config.getString("lms-cassandra.certTemplateId")
+  val sbSystemSettingsTableName = config.getString("lms-cassandra.systemSettingsTable")
+  val batchAddCertTemplateAPIPath = lmsBaseUrl + "/v1/course/batch/cert/template/add"
+
 }
