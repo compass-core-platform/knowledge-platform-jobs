@@ -87,6 +87,6 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
   val sunbirdKeyspaceName = config.getString("lms-cassandra.sbKeyspace")
   val defaultCertTemplateId = config.getString("lms-cassandra.certTemplateId")
   val sbSystemSettingsTableName = config.getString("lms-cassandra.systemSettingsTable")
-  val batchAddCertTemplateAPIPath = lmsBaseUrl + "/v1/course/batch/cert/template/add"
+  val batchAddCertTemplateAPIPath = lmsBaseUrl + "/private/v1/course/batch/cert/template/add"
 
 }
