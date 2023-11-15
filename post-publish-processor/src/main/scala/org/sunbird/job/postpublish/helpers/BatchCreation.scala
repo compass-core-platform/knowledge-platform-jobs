@@ -14,7 +14,7 @@ trait BatchCreation {
 
   private[this] val logger = LoggerFactory.getLogger(classOf[BatchCreation])
 
-  def createBatch(eData: java.util.Map[String, AnyRef], startDate: String)(implicit config: PostPublishProcessorConfig, httpUtil: HttpUtil, cassandraUtil: CassandraUtil) = {
+  def createBatch(eData: java.util.Map[String, AnyRef], startDate: String)(implicit config: PostPublishProcessorConfig, httpUtil: HttpUtil, cassandraUtil: CassandraUtil, neo4JUtil: Neo4JUtil) = {
     val request = new java.util.HashMap[String, AnyRef]() {
       {
         put("request", new java.util.HashMap[String, AnyRef]() {
@@ -60,7 +60,7 @@ trait BatchCreation {
   }
 
 
-  def batchRequired(metadata: java.util.Map[String, AnyRef], identifier: String)(implicit config: PostPublishProcessorConfig, cassandraUtil: CassandraUtil): Boolean = {
+  def batchRequired(metadata: java.util.Map[String, AnyRef], identifier: String)(implicit config: PostPublishProcessorConfig, cassandraUtil: CassandraUtil, neo4JUtil: Neo4JUtil): Boolean = {
     val trackable = isTrackable(metadata, identifier)
     if (trackable) {
       logger.info("trackable true",trackable)
@@ -106,7 +106,7 @@ trait BatchCreation {
     logger.info("printing metadata: " + metadata)
     logger.info("printing metadata ${metadata.toString()}")
     // Validate and trigger batch creation.
-    if (batchRequired(metadata, identifier)(config, cassandraUtil)) {
+    if (batchRequired(metadata, identifier)(config, cassandraUtil, neo4JUtil)) {
       logger.info("batchRequired")
       val createdFor = metadata.get("createdFor").asInstanceOf[java.util.List[String]]
       new util.HashMap[String, AnyRef]() {
@@ -123,10 +123,17 @@ trait BatchCreation {
     }
   }
 
-  def addCertTemplateToBatch(courseId: String, batchId: String)(implicit cassandraUtil: CassandraUtil, config: PostPublishProcessorConfig, httpUtil: HttpUtil) = {
+  def addCertTemplateToBatch(courseId: String, batchId: String)(implicit cassandraUtil: CassandraUtil, config: PostPublishProcessorConfig, httpUtil: HttpUtil, neo4JUtil: Neo4JUtil) = {
     logger.info("Adding cert template to batch:" + batchId + ", courseId: " + courseId)
+    val metadata = neo4JUtil.getNodeProperties(courseId)
+    val primaryCategory = metadata.getOrDefault("primaryCategory", "").toString.toLowerCase()
     val selectQuery = QueryBuilder.select().all().from(config.sunbirdKeyspaceName, config.sbSystemSettingsTableName)
-    selectQuery.where.and(QueryBuilder.eq("id", config.defaultCertTemplateId))
+    primaryCategory match {
+      case "course" => selectQuery.where.and(QueryBuilder.eq("id", config.defaultCertTemplateId))
+      case "assessment" => selectQuery.where.and(QueryBuilder.eq("id", config.defaultAssessmentCertTemplateId))
+      case _ =>  selectQuery.where.and(QueryBuilder.eq("id", config.defaultCertTemplateId))
+    }
+   // selectQuery.where.and(QueryBuilder.eq("id", config.defaultCertTemplateId))
     val row = cassandraUtil.findOne(selectQuery.toString)
     var certTemplate = new util.HashMap[String, AnyRef]()
     if (row != null) {

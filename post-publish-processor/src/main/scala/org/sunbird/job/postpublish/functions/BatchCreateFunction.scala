@@ -5,13 +5,13 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.slf4j.LoggerFactory
 import org.sunbird.job.postpublish.helpers.BatchCreation
 import org.sunbird.job.postpublish.task.PostPublishProcessorConfig
-import org.sunbird.job.util.{CassandraUtil, HttpUtil}
+import org.sunbird.job.util.{CassandraUtil, HttpUtil, Neo4JUtil}
 import org.sunbird.job.{BaseProcessFunction, Metrics}
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneId, ZonedDateTime}
 
-class BatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUtil, @transient var cassandraUtil: CassandraUtil = null)
+class BatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUtil, @transient var cassandraUtil: CassandraUtil = null,  @transient var neo4JUtil: Neo4JUtil = null)
   extends BaseProcessFunction[java.util.Map[String, AnyRef], String](config) with BatchCreation {
 
   private[this] val logger = LoggerFactory.getLogger(classOf[BatchCreateFunction])
@@ -19,6 +19,7 @@ class BatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUtil
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
     cassandraUtil = new CassandraUtil(config.dbHost, config.dbPort,config)
+    neo4JUtil = new Neo4JUtil(config.graphRoutePath, config.graphName, config)
   }
 
   override def close(): Unit = {
@@ -32,7 +33,7 @@ class BatchCreateFunction(config: PostPublishProcessorConfig, httpUtil: HttpUtil
     val startDate = ZonedDateTime.now(ZoneId.of("Asia/Kolkata")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     logger.info("Creating Batch for " + collectionId + " with start date:" + startDate)
     try {
-      createBatch(eData, startDate)(config, httpUtil, cassandraUtil)
+      createBatch(eData, startDate)(config, httpUtil, cassandraUtil, neo4JUtil)
       metrics.incCounter(config.batchCreationSuccessCount)
       logger.info("Batch created for " + collectionId)
     } catch {
