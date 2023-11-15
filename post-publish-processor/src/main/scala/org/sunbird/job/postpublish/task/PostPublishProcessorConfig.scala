@@ -88,5 +88,6 @@ class PostPublishProcessorConfig(override val config: Config) extends BaseJobCon
   val defaultCertTemplateId = config.getString("lms-cassandra.certTemplateId")
   val sbSystemSettingsTableName = config.getString("lms-cassandra.systemSettingsTable")
   val batchAddCertTemplateAPIPath = lmsBaseUrl + "/private/v1/course/batch/cert/template/add"
+  val defaultAssessmentCertTemplateId = config.getString("lms-cassandra.assessment.certTemplateId")
 
 }
